@@ -100,9 +100,6 @@ gosta_audio %>%
   geom_text(aes(label = track_name)) +
   theme(legend.position = "none")
 
-
-# will add l
-
 ## gets detailed audio attributes for a specific song. returns as large list
 gbaudio2 <- get_track_audio_analysis("4ZdH5B3tijHjWiwyOErgtf", authorization = get_spotify_access_token())
 
