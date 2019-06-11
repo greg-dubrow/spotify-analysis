@@ -12,7 +12,7 @@ devtools::install_github('charlie86/spotifyr', force = TRUE)
 # if you need to add spotify API keys
 #usethis::edit_r_environ()
 # as SPOTIFY_CLIENT_ID = 'xxxxxxxxxxxxxxxxxxxxx'
-# ans SPOTIFY_CLIENT_SECRET = 'xxxxxxxxxxxxxxxxxxxxx'
+# as SPOTIFY_CLIENT_SECRET = 'xxxxxxxxxxxxxxxxxxxxx'
 
 # or do
 # Sys.setenv(SPOTIFY_CLIENT_ID = 'xxxxxxxxxxxxxxxxxxxxx')
@@ -81,10 +81,11 @@ gosta_audio <- left_join(gosta_audio2, gbtrack2) %>%
 glimpse(gosta_audio)
 
 ## visualize the data!
-# some notes from spotify here about elements 
-# https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/
-# most of the aduio features are 0-1, 1 being highest. e.g. higher speechiness = more words::music
-# loundess in dB, valence is "happiness", w/ higher = happier, tempo is BPM
+  # some notes from spotify here about elements 
+  # https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/
+  # most of the aduio features are 0-1, 1 being highest. e.g. higher speechiness = more words::music
+  # loundess in dB, valence is "happiness", w/ higher = happier, tempo is BPM
+  # md file to copme with images
 
 # is there a relationship between tempo & happiness?
 gosta_audio %>%
