@@ -88,10 +88,12 @@ first just looked up the EP data, but the dataframes came back with
 results in a different format than the Winterland data, so I decided to
 just get everything the same way.
 
-First, I looked up the album IDs on Spotify: Gosta Berling artist id =
-4Vb2yqJJthJTAZxKz4Aryn Travel album id 0vBs7ZtBj3ROrRyac3M47q
-Everybody’s Sweetheart album id 0dJBaJ3VFxOtdG5L9yzALJ Winterland
-album id 6CMekiY6lCIuBZpzFDInpf
+First, I looked up the album IDs on Spotify:
+
+  - Gosta Berling artist id = 4Vb2yqJJthJTAZxKz4Aryn
+  - Travel album id = 0vBs7ZtBj3ROrRyac3M47q
+  - Everybody’s Sweetheart album id = 0dJBaJ3VFxOtdG5L9yzALJ
+  - Winterland album id = 6CMekiY6lCIuBZpzFDInpf
 
 The code here gets a dataframe for each record. I also needed to add
 album title. Next steps were to merge the album dataframes together,
