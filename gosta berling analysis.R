@@ -4,6 +4,7 @@ library(tidyverse)
 library(httr)
 library(stringr)
 library(lubridate)
+library(ggrepel)
 library(spotifyr)
 
 # as of 061019 issues w./ CRAN verson, override with dev
@@ -91,10 +92,16 @@ glimpse(gosta_audio)
 gosta_audio %>%
   ggplot(aes(tempo, valence, color = album)) +
   geom_point() +
-  geom_text(aes(label = track_name), size = 3) +
+  geom_text_repel(aes(label = track_name), size = 3) +
+  scale_color_manual(values = c("#707070", "brown", "dark blue")) +
   theme_minimal() +
   labs(x = "temp (bpm)", y = "valence (happiness)") +
   theme(legend.position = "bottom", legend.title = element_blank())
+
+# get colors from https://www.ginifab.com/feeds/pms/color_picker_from_image.php
+# winterland color #8989a2
+#travel #615a54
+# sweethear #707070
 
 # speechiness & happiness?
 gosta_audio %>%

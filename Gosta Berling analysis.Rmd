@@ -31,6 +31,7 @@ library(tidyverse)
 library(httr)
 library(stringr)
 library(lubridate)
+library(ggrepel)
 library(spotifyr)
 ```
 
@@ -141,12 +142,13 @@ The result is a nice tidy dataframe, ready for some analysis.
 - Most of the aduio features are 0-1, 1 being highest. e.g. higher speechiness = higher ratio of words::music. Valence is "happiness", where higher = happier.
 - Loundess in dB, tempo is BPM
 
-First I wondered if there's a relationship between song tempo & happiness? So, a scatterplot, with song titles as data labels, and dots colored by album name to see also if any of the albums clustered at all.
+First I wondered if there's a relationship between song tempo & happiness? So, a scatterplot, with song titles as data labels, and dots colored by album name (using primary color from the cover) to see also if any of the albums clustered at all along either axis. ggrepel is used to move the labels off of the dots
 ```{r ECHO = FALSE}
 gosta_audio %>%
   ggplot(aes(tempo, valence, color = album)) +
   geom_point() +
-  geom_text(aes(label = track_name), size = 3) +
+  geom_text_repel(aes(label = track_name), size = 3) +
+  scale_color_manual(values = c("#707070", "brown", "dark blue")) +
   theme_minimal() +
   labs(x = "temp (bpm)", y = "valence (happiness)") +
   theme(legend.position = "bottom", legend.title = element_blank())

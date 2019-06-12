@@ -32,6 +32,7 @@ library(tidyverse)
 library(httr)
 library(stringr)
 library(lubridate)
+library(ggrepel)
 library(spotifyr)
 ```
 
@@ -219,13 +220,16 @@ elements:
 
 First I wondered if there’s a relationship between song tempo &
 happiness? So, a scatterplot, with song titles as data labels, and dots
-colored by album name to see also if any of the albums clustered at all.
+colored by album name (using primary color from the cover) to see also
+if any of the albums clustered at all along either axis. ggrepel is used
+to move the labels off of the dots
 
 ``` r
 gosta_audio %>%
   ggplot(aes(tempo, valence, color = album)) +
   geom_point() +
-  geom_text(aes(label = track_name), size = 3) +
+  geom_text_repel(aes(label = track_name), size = 3) +
+  scale_color_manual(values = c("#707070", "brown", "dark blue")) +
   theme_minimal() +
   labs(x = "temp (bpm)", y = "valence (happiness)") +
   theme(legend.position = "bottom", legend.title = element_blank())
