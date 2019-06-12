@@ -231,7 +231,7 @@ gosta_audio %>%
   geom_text_repel(aes(label = track_name), size = 3) +
   scale_color_manual(values = c("#707070", "brown", "dark blue")) +
   theme_minimal() +
-  labs(x = "temp (bpm)", y = "valence (happiness)") +
+  labs(x = "tempo (bpm)", y = "valence (happiness)") +
   theme(legend.position = "bottom", legend.title = element_blank())
 ```
 
