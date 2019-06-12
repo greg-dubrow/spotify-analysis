@@ -7,10 +7,10 @@ library(lubridate)
 library(spotifyr)
 
 # as of 061019 issues w./ CRAN verson, override with dev
-devtools::install_github('charlie86/spotifyr', force = TRUE)
+#devtools::install_github('charlie86/spotifyr', force = TRUE)
 
 # if you need to add spotify API keys
-#usethis::edit_r_environ()
+# usethis::edit_r_environ()
 # as SPOTIFY_CLIENT_ID = 'xxxxxxxxxxxxxxxxxxxxx'
 # as SPOTIFY_CLIENT_SECRET = 'xxxxxxxxxxxxxxxxxxxxx'
 
@@ -89,9 +89,12 @@ glimpse(gosta_audio)
 
 # is there a relationship between tempo & happiness?
 gosta_audio %>%
-  ggplot(aes(tempo, valence)) +
+  ggplot(aes(tempo, valence, color = album)) +
   geom_point() +
-  geom_text(aes(label = track_name))
+  geom_text(aes(label = track_name), size = 3) +
+  theme_minimal() +
+  labs(x = "temp (bpm)", y = "valence (happiness)") +
+  theme(legend.position = "bottom", legend.title = element_blank())
 
 # speechiness & happiness?
 gosta_audio %>%
