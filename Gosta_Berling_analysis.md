@@ -213,9 +213,9 @@ have good explanations of the data. Some notes from spotify here about
 elements:
 
   - Most of the aduio features are 0-1, 1 being highest. e.g. higher
-    speechiness = more words::music
-  - Loundess in dB, valence is “happiness”, w/ higher = happier, tempo
-    is BPM
+    speechiness = higher ratio of words::music. Valence is “happiness”,
+    where higher = happier.
+  - Loundess in dB, tempo is BPM
 
 First I wondered if there’s a relationship between song tempo &
 happiness? So, a scatterplot, with song titles as data labels, and dots
@@ -232,3 +232,7 @@ gosta_audio %>%
 ```
 
 <img src="images/unnamed-chunk-7-1.png" width="100%" />
+
+So yes, most of our songs are in the bottom half of the happy scale. And
+there does seem to be a bit of a relationship between temp and
+happiness.
