@@ -1,7 +1,7 @@
 Gosta Berling analysis
 ================
 greg dubrow
-June 11, 2019
+June 15, 2019
 
 ## Using the Spoitfy API and spotifyr package to visualize some music I’ve made
 
@@ -34,6 +34,10 @@ library(stringr)
 library(lubridate)
 library(ggrepel)
 library(spotifyr)
+library(janitor)
+library(GGally)
+library(PerformanceAnalytics)
+library(corrr)
 ```
 
 As of June 2019 there were some minor bugs in the CRAN version. They’re
@@ -220,25 +224,228 @@ elements:
     where higher = happier.
   - Loundess in dB, tempo is BPM
 
-First I wondered if there’s a relationship between song tempo &
-happiness? So, a scatterplot, with song titles as data labels, and dots
-colored by album name (using primary color from the cover) to see also
-if any of the albums clustered at all along either axis. ggrepel is used
-to move the labels off of the dots
+First I wanted to look at basic correlations for the values. There are a
+number of ways to run and visualize correlations in r…a few examples
+follow. First thing I needed to do was a subset of the gosta\_audio df
+for easier calls with the various correlation packages.
+
+``` r
+gbcorr <- gosta_audio[, c(6:15)]
+```
+
+Let’s try correlations in base r. You get the coefficients in the
+console or you can output to a dataframe to hard-code the visualization.
+
+``` r
+cor(gbcorr)
+#>                  duration_ms danceability      energy    loudness
+#> duration_ms       1.00000000   0.03575546 -0.09957649  0.16485951
+#> danceability      0.03575546   1.00000000 -0.10466026  0.09671649
+#> energy           -0.09957649  -0.10466026  1.00000000  0.85748849
+#> loudness          0.16485951   0.09671649  0.85748849  1.00000000
+#> tempo            -0.15893636  -0.27191484  0.51400852  0.49520052
+#> valence          -0.04414383  -0.10232090  0.72025346  0.48053791
+#> acousticness     -0.19009855   0.11222116 -0.74742026 -0.65043898
+#> instrumentalness  0.12784620   0.06977532 -0.53088295 -0.49709651
+#> liveness         -0.30987073  -0.25213421  0.49374017  0.30054882
+#> speechiness      -0.30678610  -0.31639826  0.45449667  0.27298422
+#>                       tempo     valence acousticness instrumentalness
+#> duration_ms      -0.1589364 -0.04414383   -0.1900986       0.12784620
+#> danceability     -0.2719148 -0.10232090    0.1122212       0.06977532
+#> energy            0.5140085  0.72025346   -0.7474203      -0.53088295
+#> loudness          0.4952005  0.48053791   -0.6504390      -0.49709651
+#> tempo             1.0000000  0.55192475   -0.3612391      -0.44118097
+#> valence           0.5519247  1.00000000   -0.7793878      -0.29646550
+#> acousticness     -0.3612391 -0.77938779    1.0000000       0.39266796
+#> instrumentalness -0.4411810 -0.29646550    0.3926680       1.00000000
+#> liveness          0.5316901  0.47433091   -0.3261889      -0.34060869
+#> speechiness       0.4217976  0.41684028   -0.3150009      -0.56643572
+#>                    liveness speechiness
+#> duration_ms      -0.3098707  -0.3067861
+#> danceability     -0.2521342  -0.3163983
+#> energy            0.4937402   0.4544967
+#> loudness          0.3005488   0.2729842
+#> tempo             0.5316901   0.4217976
+#> valence           0.4743309   0.4168403
+#> acousticness     -0.3261889  -0.3150009
+#> instrumentalness -0.3406087  -0.5664357
+#> liveness          1.0000000   0.7459700
+#> speechiness       0.7459700   1.0000000
+gbcorrs1 <- as.data.frame(cor(gbcorr))
+gbcorrs1
+#>                  duration_ms danceability      energy    loudness
+#> duration_ms       1.00000000   0.03575546 -0.09957649  0.16485951
+#> danceability      0.03575546   1.00000000 -0.10466026  0.09671649
+#> energy           -0.09957649  -0.10466026  1.00000000  0.85748849
+#> loudness          0.16485951   0.09671649  0.85748849  1.00000000
+#> tempo            -0.15893636  -0.27191484  0.51400852  0.49520052
+#> valence          -0.04414383  -0.10232090  0.72025346  0.48053791
+#> acousticness     -0.19009855   0.11222116 -0.74742026 -0.65043898
+#> instrumentalness  0.12784620   0.06977532 -0.53088295 -0.49709651
+#> liveness         -0.30987073  -0.25213421  0.49374017  0.30054882
+#> speechiness      -0.30678610  -0.31639826  0.45449667  0.27298422
+#>                       tempo     valence acousticness instrumentalness
+#> duration_ms      -0.1589364 -0.04414383   -0.1900986       0.12784620
+#> danceability     -0.2719148 -0.10232090    0.1122212       0.06977532
+#> energy            0.5140085  0.72025346   -0.7474203      -0.53088295
+#> loudness          0.4952005  0.48053791   -0.6504390      -0.49709651
+#> tempo             1.0000000  0.55192475   -0.3612391      -0.44118097
+#> valence           0.5519247  1.00000000   -0.7793878      -0.29646550
+#> acousticness     -0.3612391 -0.77938779    1.0000000       0.39266796
+#> instrumentalness -0.4411810 -0.29646550    0.3926680       1.00000000
+#> liveness          0.5316901  0.47433091   -0.3261889      -0.34060869
+#> speechiness       0.4217976  0.41684028   -0.3150009      -0.56643572
+#>                    liveness speechiness
+#> duration_ms      -0.3098707  -0.3067861
+#> danceability     -0.2521342  -0.3163983
+#> energy            0.4937402   0.4544967
+#> loudness          0.3005488   0.2729842
+#> tempo             0.5316901   0.4217976
+#> valence           0.4743309   0.4168403
+#> acousticness     -0.3261889  -0.3150009
+#> instrumentalness -0.3406087  -0.5664357
+#> liveness          1.0000000   0.7459700
+#> speechiness       0.7459700   1.0000000
+```
+
+Or you could let some packages do the viz work for you. First, the
+ggally package.
+
+``` r
+ggcorr(gbcorr, label = TRUE)
+```
+
+<img src="images/unnamed-chunk-9-1.png" width="100%" />
+
+With the corrr package I tried a couple of approaches. First a basic
+matrix that prints to the console, and doesn’t look much different than
+base r.
+
+``` r
+gbcorr %>%
+  correlate(use = "pairwise.complete.obs", method = "spearman")
+#> 
+#> Correlation method: 'spearman'
+#> Missing treated using: 'pairwise.complete.obs'
+#> # A tibble: 10 x 11
+#>    rowname duration_ms danceability energy loudness  tempo valence
+#>    <chr>         <dbl>        <dbl>  <dbl>    <dbl>  <dbl>   <dbl>
+#>  1 durati…     NA            0.0799 -0.319   -0.189 -0.439  -0.191
+#>  2 dancea…      0.0799      NA      -0.269   -0.124 -0.323  -0.209
+#>  3 energy      -0.319       -0.269  NA        0.872  0.658   0.761
+#>  4 loudne…     -0.189       -0.124   0.872   NA      0.574   0.458
+#>  5 tempo       -0.439       -0.323   0.658    0.574 NA       0.665
+#>  6 valence     -0.191       -0.209   0.761    0.458  0.665  NA    
+#>  7 acoust…     -0.0737       0.128  -0.725   -0.595 -0.479  -0.770
+#>  8 instru…      0.135        0.0333 -0.447   -0.586 -0.416  -0.177
+#>  9 livene…     -0.319       -0.321   0.319    0.144  0.479   0.488
+#> 10 speech…     -0.331       -0.715   0.382    0.283  0.640   0.396
+#> # … with 4 more variables: acousticness <dbl>, instrumentalness <dbl>,
+#> #   liveness <dbl>, speechiness <dbl>
+```
+
+Next, I used their rplot call and then a network graph
+
+``` r
+gbcorrs2 <- correlate(gbcorr)
+#> 
+#> Correlation method: 'pearson'
+#> Missing treated using: 'pairwise.complete.obs'
+rplot(gbcorrs2)
+```
+
+<img src="images/unnamed-chunk-11-1.png" width="100%" />
+
+``` r
+   # network graph
+correlate(gbcorr) %>% 
+  network_plot(min_cor=0.5)
+#> 
+#> Correlation method: 'pearson'
+#> Missing treated using: 'pairwise.complete.obs'
+```
+
+<img src="images/unnamed-chunk-11-2.png" width="100%" />
+
+And finally the performance analytics package, which was the first of
+the packages to include significance levels in the default output.
+
+``` r
+#chart.Correlation(gbcorr, histogram=TRUE, pch="+")
+chart.Correlation(gbcorr, histogram = FALSE, method = c("pearson", "kendall", "spearman"))
+```
+
+<img src="images/unnamed-chunk-12-1.png" width="100%" />
+
+Given the correlations, I was interested in exploring the relationships
+a bit more. So I ran a few scatterplot, with song titles as data labels,
+and dots colored by album name (using primary color from the cover) to
+see also if any of the albums clustered at all along either axis. The
+ggrepel package is used to move the labels off of the dots
+
+First, up, energy and happiness. Spotify uses the term valence to
+signify happiness, or “musical positiveness. For energy, as they put
+it”Typically, energetic tracks feel fast, loud, and noisy. Again, [see
+the API
+documentation](https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/)
+for definitions.
+
+``` r
+gosta_audio %>%
+  ggplot(aes(energy, valence, color = album)) +
+  geom_point() +
+  geom_smooth(aes(color = NULL)) +
+  geom_text_repel(aes(label = track_name), size = 3) +
+  scale_color_manual(values = c("#707070", "brown", "dark blue")) +
+  ylim(0, 1) +
+  xlim(0, 1) +
+  theme_minimal() +
+  labs(x = "energy", y = "valence (happiness)") +
+  theme(legend.position = "bottom", legend.title = element_blank())
+#> `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+```
+
+<img src="images/unnamed-chunk-13-1.png" width="100%" />
+
+Next I wondered if there’s a relationship between song tempo (beats per
+minute) & happiness. Out average BPM is 131, which isn’t too far the the
+mid-range of songs on Spotify. The Spotify API page as a histogram of
+the BPM distribution
+[here](https://developer.spotify.com/assets/audio/tempo.png)
+![](https://developer.spotify.com/assets/audio/tempo.png)
 
 ``` r
 gosta_audio %>%
   ggplot(aes(tempo, valence, color = album)) +
   geom_point() +
   geom_text_repel(aes(label = track_name), size = 3) +
-  scale_color_manual(values = c("#707070", "brown", "dark blue")) +
+  scale_color_manual(values = c("#707070", "brown", "dark blue")) + 
+  ylim(0, 1) +
   theme_minimal() +
   labs(x = "tempo (bpm)", y = "valence (happiness)") +
   theme(legend.position = "bottom", legend.title = element_blank())
 ```
 
-<img src="images/unnamed-chunk-7-1.png" width="100%" />
+<img src="images/unnamed-chunk-14-1.png" width="100%" />
+
+And finally, tempo and energy
+
+``` r
+gosta_audio %>%
+  ggplot(aes(tempo, energy, color = album)) +
+  geom_point() +
+  geom_smooth(aes(color = NULL)) +
+  geom_text_repel(aes(label = track_name), size = 3) +
+  scale_color_manual(values = c("#707070", "brown", "dark blue")) +
+  ylim(0, 1) +
+  theme_minimal() +
+  labs(x = "tempo (bpm)", y = "energy") +
+  theme(legend.position = "bottom", legend.title = element_blank())
+#> `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+```
+
+<img src="images/unnamed-chunk-15-1.png" width="100%" />
 
 So yes, most of our songs are in the bottom half of the happy scale. And
-there does seem to be a bit of a relationship between temp and
-happiness.
+there does seem to be a bit of a relationship between tempo, energy and
+happiness and of course a relationship between tempo and energy

@@ -33,6 +33,11 @@ library(stringr)
 library(lubridate)
 library(ggrepel)
 library(spotifyr)
+library(janitor)
+library(GGally)
+library(PerformanceAnalytics)
+library(corrr)
+
 ```
 
 As of June 2019 there were some minor bugs in the CRAN version. They're fixed in the dev version, which you can get with this call: 
@@ -143,16 +148,91 @@ The result is a nice tidy dataframe, ready for some analysis.
 - Most of the aduio features are 0-1, 1 being highest. e.g. higher speechiness = higher ratio of words::music. Valence is "happiness", where higher = happier.
 - Loundess in dB, tempo is BPM
 
-First I wondered if there's a relationship between song tempo & happiness? So, a scatterplot, with song titles as data labels, and dots colored by album name (using primary color from the cover) to see also if any of the albums clustered at all along either axis. ggrepel is used to move the labels off of the dots
+First I wanted to look at basic correlations for the values. There are a number of ways to run and visualize correlations in r...a few examples follow. First thing I needed to do was a subset of the gosta_audio df for easier calls with the various correlation packages.
 ```{r ECHO = FALSE}
+gbcorr <- gosta_audio[, c(6:15)]
+```
+
+Let's try correlations in base r. You get the coefficients in the console or you can output to a dataframe to hard-code the visualization.
+```{r ECHO = FALSE}
+cor(gbcorr)
+gbcorrs1 <- as.data.frame(cor(gbcorr))
+gbcorrs1
+```
+
+Or you could let some packages do the viz work for you.
+First, the ggally package.
+```{r ECHO = FALSE}
+ggcorr(gbcorr, label = TRUE)
+```
+
+With the corrr package I tried a couple of approaches. First a basic matrix that prints to the console, and doesn't look much different than base r.
+```{r ECHO = FALSE}
+gbcorr %>%
+  correlate(use = "pairwise.complete.obs", method = "spearman")
+```
+
+Next, I used their rplot call and then a network graph
+```{r ECHO = FALSE}
+gbcorrs2 <- correlate(gbcorr)
+rplot(gbcorrs2)
+   # network graph
+correlate(gbcorr) %>% 
+  network_plot(min_cor=0.5)
+```
+
+And finally the  performance analytics package, which was the first of the packages to include significance levels in the default output.
+```{r ECHO = FALSE}
+#chart.Correlation(gbcorr, histogram=TRUE, pch="+")
+chart.Correlation(gbcorr, histogram = FALSE, method = c("pearson", "kendall", "spearman"))
+
+```
+
+Given the correlations, I was interested in exploring the relationships a bit more. So I ran a few scatterplot, with song titles as data labels, and dots colored by album name (using primary color from the cover) to see also if any of the albums clustered at all along either axis. The ggrepel package is used to move the labels off of the dots
+
+First, up, energy and happiness. Spotify uses the term valence to signify happiness, or "musical positiveness. For energy, as they put it "Typically, energetic tracks feel fast, loud, and noisy. Again, 
+[see the API documentation](https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/) for definitions.
+```{r fig.width=7.5, fig.height=4.0, dpi = 300}
+gosta_audio %>%
+  ggplot(aes(energy, valence, color = album)) +
+  geom_point() +
+  geom_smooth(aes(color = NULL)) +
+  geom_text_repel(aes(label = track_name), size = 3) +
+  scale_color_manual(values = c("#707070", "brown", "dark blue")) +
+  ylim(0, 1) +
+  xlim(0, 1) +
+  theme_minimal() +
+  labs(x = "energy", y = "valence (happiness)") +
+  theme(legend.position = "bottom", legend.title = element_blank())
+```
+
+Next I wondered if there's a relationship between song tempo (beats per minute) & happiness. Out average BPM is 131, which isn't too far the the mid-range of songs on Spotify. The Spotify API page as a histogram of the BPM distribution [here](https://developer.spotify.com/assets/audio/tempo.png) ![](https://developer.spotify.com/assets/audio/tempo.png)
+```{r fig.width=7.5, fig.height=4.0, dpi = 300}
 gosta_audio %>%
   ggplot(aes(tempo, valence, color = album)) +
   geom_point() +
   geom_text_repel(aes(label = track_name), size = 3) +
-  scale_color_manual(values = c("#707070", "brown", "dark blue")) +
+  scale_color_manual(values = c("#707070", "brown", "dark blue")) + 
+  ylim(0, 1) +
   theme_minimal() +
   labs(x = "tempo (bpm)", y = "valence (happiness)") +
   theme(legend.position = "bottom", legend.title = element_blank())
 ```
 
-So yes, most of our songs are in the bottom half of the happy scale. And there does seem to be a bit of a relationship between temp and happiness.
+And finally, tempo and energy
+```{r fig.width=7.5, fig.height=4.0, dpi = 300}
+gosta_audio %>%
+  ggplot(aes(tempo, energy, color = album)) +
+  geom_point() +
+  geom_smooth(aes(color = NULL)) +
+  geom_text_repel(aes(label = track_name), size = 3) +
+  scale_color_manual(values = c("#707070", "brown", "dark blue")) +
+  ylim(0, 1) +
+  theme_minimal() +
+  labs(x = "tempo (bpm)", y = "energy") +
+  theme(legend.position = "bottom", legend.title = element_blank())
+
+```
+
+So yes, most of our songs are in the bottom half of the happy scale. And there does seem to be a bit of a relationship between tempo, energy and happiness and of course a relationship between tempo and energy
+
