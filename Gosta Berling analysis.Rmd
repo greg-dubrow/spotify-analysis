@@ -192,7 +192,7 @@ Given the correlations, I was interested in exploring the relationships a bit mo
 
 First, up, energy and happiness. Spotify uses the term valence to signify happiness, or "musical positiveness. For energy, as they put it "Typically, energetic tracks feel fast, loud, and noisy. Again, 
 [see the API documentation](https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/) for definitions.
-```{r fig.width=7.5, fig.height=4.0, dpi = 300}
+```{r fig.width=7.5, fig.height=4.0, dpi = 300, ECHO = FALSE}
 gosta_audio %>%
   ggplot(aes(energy, valence, color = album)) +
   geom_point() +
@@ -207,10 +207,11 @@ gosta_audio %>%
 ```
 
 Next I wondered if there's a relationship between song tempo (beats per minute) & happiness. Out average BPM is 131, which isn't too far the the mid-range of songs on Spotify. The Spotify API page as a histogram of the BPM distribution [here](https://developer.spotify.com/assets/audio/tempo.png) ![](https://developer.spotify.com/assets/audio/tempo.png)
-```{r fig.width=7.5, fig.height=4.0, dpi = 300}
+```{r fig.width=7.5, fig.height=4.0, dpi = 300, ECHO = FALSE}
 gosta_audio %>%
   ggplot(aes(tempo, valence, color = album)) +
   geom_point() +
+  geom_smooth(aes(color = NULL)) +
   geom_text_repel(aes(label = track_name), size = 3) +
   scale_color_manual(values = c("#707070", "brown", "dark blue")) + 
   ylim(0, 1) +
@@ -220,7 +221,7 @@ gosta_audio %>%
 ```
 
 And finally, tempo and energy
-```{r fig.width=7.5, fig.height=4.0, dpi = 300}
+```{r fig.width=7.5, fig.height=4.0, dpi = 300, ECHO = FALSE}
 gosta_audio %>%
   ggplot(aes(tempo, energy, color = album)) +
   geom_point() +
@@ -231,7 +232,6 @@ gosta_audio %>%
   theme_minimal() +
   labs(x = "tempo (bpm)", y = "energy") +
   theme(legend.position = "bottom", legend.title = element_blank())
-
 ```
 
 So yes, most of our songs are in the bottom half of the happy scale. And there does seem to be a bit of a relationship between tempo, energy and happiness and of course a relationship between tempo and energy

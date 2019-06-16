@@ -418,12 +418,14 @@ the BPM distribution
 gosta_audio %>%
   ggplot(aes(tempo, valence, color = album)) +
   geom_point() +
+  geom_smooth(aes(color = NULL)) +
   geom_text_repel(aes(label = track_name), size = 3) +
   scale_color_manual(values = c("#707070", "brown", "dark blue")) + 
   ylim(0, 1) +
   theme_minimal() +
   labs(x = "tempo (bpm)", y = "valence (happiness)") +
   theme(legend.position = "bottom", legend.title = element_blank())
+#> `geom_smooth()` using method = 'loess' and formula 'y ~ x'
 ```
 
 <img src="images/unnamed-chunk-14-1.png" width="100%" />
