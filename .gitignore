@@ -5,3 +5,5 @@
 .DS_Store
 .httr-oauth
 .rds
+all_dwa_tracks.rds
+all_dwa_feat.rds
