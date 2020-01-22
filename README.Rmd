@@ -1,0 +1,17 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  out.width = "100%"
+)
+```
+
+Various analyses using the Spotify API for some music data nerding
+
+Mainly using [spotifyr](https://www.rcharlie.com/spotifyr/) as well as some other packages
