@@ -1,5 +1,7 @@
 ---
-title: "Gosta Berling analysis"
+title: |
+    | Sad songs & pretty charts: 
+    | *a Gosta Berling music data visualization* 
 author: "greg dubrow"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output: github_document
@@ -14,6 +16,8 @@ knitr::opts_chunk$set(
 ```
 
 ## Using the Spoitfy API and spotifyr package to visualize some music I've made
+
+For my first post, I thought I'd focus on music analytics, given that music and data science/analysis are two things I've probably spent most of my waking hours on for a number of years now. 
 
 Over the years I've made a lot of music in a number of different projects. For most of my time living in the Bay Area I've played with some friends in a band called [Gosta Berling](https://gostaberling.bandcamp.com/). We've released two EPs and a full album *(click on the album covers to give listen)*
 
@@ -188,9 +192,9 @@ chart.Correlation(gbcorr, histogram = FALSE, method = c("pearson", "kendall", "s
 
 ```
 
-Given the correlations, I was interested in exploring the relationships a bit more. So I ran a few scatterplot, with song titles as data labels, and dots colored by album name (using primary color from the cover) to see also if any of the albums clustered at all along either axis. The ggrepel package is used to move the labels off of the dots
+Given the correlations, I was interested in exploring the relationships a bit more. So I ran a few scatterplots, with song titles as data labels, and dots colored by album name (using primary color from the cover) to see also if any of the albums clustered at all along either axis. The ggrepel package is used to move the labels off of the dots
 
-First, up, energy and happiness. Spotify uses the term valence to signify happiness, or "musical positiveness. For energy, as they put it "Typically, energetic tracks feel fast, loud, and noisy. Again, 
+First, up, energy and happiness. Spotify uses the term valence to signify happiness, or "musical positiveness". For energy, as they put it "Typically, energetic tracks feel fast, loud, and noisy." Again, 
 [see the API documentation](https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/) for definitions.
 ```{r fig.width=7.5, fig.height=4.0, dpi = 300, ECHO = FALSE}
 gosta_audio %>%
@@ -206,7 +210,11 @@ gosta_audio %>%
   theme(legend.position = "bottom", legend.title = element_blank())
 ```
 
-Next I wondered if there's a relationship between song tempo (beats per minute) & happiness. Out average BPM is 131, which isn't too far the the mid-range of songs on Spotify. The Spotify API page as a histogram of the BPM distribution [here](https://developer.spotify.com/assets/audio/tempo.png) ![](https://developer.spotify.com/assets/audio/tempo.png)
+There is a bit of a relationship between the Energy score and Valence - so our more energetic songs are our happiest songs. Another interesting way to explore this would be to do some sentiment analysis on the lyics and see if there's a relationship between energy, valence and using words considered to be more positive in nature.
+
+Next I wondered if there's a relationship between song tempo (beats per minute) & happiness. Our average BPM is 131, which isn't too far the the mid-range of songs on Spotify. The histogram below comes from the [Spotify API page](https://developer.spotify.com/assets/audio/tempo.png) ![](https://developer.spotify.com/assets/audio/tempo.png)
+
+So let's see the code and resulting scatterplot...
 ```{r fig.width=7.5, fig.height=4.0, dpi = 300, ECHO = FALSE}
 gosta_audio %>%
   ggplot(aes(tempo, valence, color = album)) +
@@ -219,8 +227,10 @@ gosta_audio %>%
   labs(x = "tempo (bpm)", y = "valence (happiness)") +
   theme(legend.position = "bottom", legend.title = element_blank())
 ```
+It's not until we get to about the 130 BPM range is it that our songs start to get to about a .5 valence (happiness) score, and from there the relationship between tempo & happiness really kicks in.
 
-And finally, tempo and energy
+
+Finally, tempo and energy
 ```{r fig.width=7.5, fig.height=4.0, dpi = 300, ECHO = FALSE}
 gosta_audio %>%
   ggplot(aes(tempo, energy, color = album)) +
@@ -236,3 +246,4 @@ gosta_audio %>%
 
 So yes, most of our songs are in the bottom half of the happy scale. And there does seem to be a bit of a relationship between tempo, energy and happiness and of course a relationship between tempo and energy
 
+So if you like slightly melancholy mood-pop that's in the 130 +/- BPM range, I think you'll like us. 
