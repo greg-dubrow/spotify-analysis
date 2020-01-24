@@ -32,6 +32,7 @@ So first thing, let's load the packages we'll be using:
 
 ```{r pkg load, message=FALSE, ECHO = FALSE}
 library(tidyverse)
+library(tidylog)
 library(httr)
 library(stringr)
 library(lubridate)
@@ -44,9 +45,11 @@ library(corrr)
 
 ```
 
-As of June 2019 there were some minor bugs in the CRAN version. They're fixed in the dev version, which you can get with this call: 
+The spotifyr package is available from CRAN or from the dev version:
+
 ```{r  eval = FALSE}
- devtools::install_github('charlie86/spotifyr', force = TRUE)
+# install.packages("spotifyr")
+# devtools::install_github('charlie86/spotifyr', force = TRUE)
 ```
 
 To get access the Spotify data, you need a developer key. Charlie's explained how to do it on the package page, so I won't repeat that here. To set up the keys in your .Renviron, run
@@ -161,7 +164,6 @@ Let's try correlations in base r. You get the coefficients in the console or you
 ```{r ECHO = FALSE}
 cor(gbcorr)
 gbcorrs1 <- as.data.frame(cor(gbcorr))
-gbcorrs1
 ```
 
 Or you could let some packages do the viz work for you.
@@ -170,13 +172,15 @@ First, the ggally package.
 ggcorr(gbcorr, label = TRUE)
 ```
 
+We see here some strong postive associations with energy & loundess returning a .9 coefficient, and liveness & speechiness and energy & valence each returing at .7 coefficient. The energy & acousticness and loudness & acousticness combinations each return a -.7 coefficient, showing a negative relationship between those music features. 
+
 With the corrr package I tried a couple of approaches. First a basic matrix that prints to the console, and doesn't look much different than base r.
 ```{r ECHO = FALSE}
 gbcorr %>%
   correlate(use = "pairwise.complete.obs", method = "spearman")
 ```
 
-Next, I used their rplot call and then a network graph
+Next, I used their rplot call and then rendered a network graph using the network_plot() call.
 ```{r ECHO = FALSE}
 gbcorrs2 <- correlate(gbcorr)
 rplot(gbcorrs2)
@@ -194,7 +198,7 @@ chart.Correlation(gbcorr, histogram = FALSE, method = c("pearson", "kendall", "s
 
 Given the correlations, I was interested in exploring the relationships a bit more. So I ran a few scatterplots, with song titles as data labels, and dots colored by album name (using primary color from the cover) to see also if any of the albums clustered at all along either axis. The ggrepel package is used to move the labels off of the dots
 
-First, up, energy and happiness. Spotify uses the term valence to signify happiness, or "musical positiveness". For energy, as they put it "Typically, energetic tracks feel fast, loud, and noisy." Again, 
+First, up, energy and valence, or happiness. Spotify uses the term valence to signify happiness, or "musical positiveness". For energy, as they put it "Typically, energetic tracks feel fast, loud, and noisy." Again, 
 [see the API documentation](https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/) for definitions.
 ```{r fig.width=7.5, fig.height=4.0, dpi = 300, ECHO = FALSE}
 gosta_audio %>%
@@ -244,6 +248,6 @@ gosta_audio %>%
   theme(legend.position = "bottom", legend.title = element_blank())
 ```
 
-So yes, most of our songs are in the bottom half of the happy scale. And there does seem to be a bit of a relationship between tempo, energy and happiness and of course a relationship between tempo and energy
+So yes, most of our songs are in the bottom half of the happy scale. And there does seem to be a bit of a relationship between tempo, energy and happiness and of course a relationship between tempo and energy. Going forward, I'd love to explore our song lyrics via text analysis, especially sentiment analysis to see if the songs Spotify classified as our most sad (low valence) had lyrics that were less positive. 
 
 So if you like slightly melancholy mood-pop that's in the 130 +/- BPM range, I think you'll like us. 

@@ -2,7 +2,7 @@ Sad songs & pretty charts:
 *a Gosta Berling music data visualization*
 ================
 greg dubrow
-January 21, 2020
+January 23, 2020
 
 ## Using the Spoitfy API and spotifyr package to visualize some music I’ve made
 
@@ -34,6 +34,7 @@ So first thing, let’s load the packages we’ll be using:
 
 ``` r
 library(tidyverse)
+library(tidylog)
 library(httr)
 library(stringr)
 library(lubridate)
@@ -45,11 +46,11 @@ library(PerformanceAnalytics)
 library(corrr)
 ```
 
-As of June 2019 there were some minor bugs in the CRAN version. They’re
-fixed in the dev version, which you can get with this call:
+The spotifyr package is available from CRAN or from the dev version:
 
 ``` r
- devtools::install_github('charlie86/spotifyr', force = TRUE)
+# install.packages("spotifyr")
+# devtools::install_github('charlie86/spotifyr', force = TRUE)
 ```
 
 To get access the Spotify data, you need a developer key. Charlie’s
@@ -178,6 +179,8 @@ ordered the columns.
 gbtrack2 <- gbtracks %>%
   select(id, name, album, track_number) %>%
   rename(track_name = name)
+#> select: dropped 11 variables (artists, available_markets, disc_number, duration_ms, explicit, …)
+#> rename: renamed one variable (track_name)
 
 # merge to complete df. add names for key and mode
 gosta_audio <- left_join(gosta_audio2, gbtrack2) %>%
@@ -192,6 +195,17 @@ gosta_audio <- left_join(gosta_audio2, gbtrack2) %>%
          acousticness, instrumentalness, liveness, speechiness,
          key_name, mode_name, key, mode)
 #> Joining, by = "id"
+#> left_join: added 3 columns (track_name, album, track_number)
+#>            > rows only in x    0
+#>            > rows only in y  ( 0)
+#>            > matched rows     19
+#>            >                 ====
+#>            > rows total       19
+#> mutate: new variable 'key_name' with 7 unique values and 0% NA
+#> mutate: new variable 'mode_name' with 2 unique values and 0% NA
+#> mutate: new variable 'key_mode' with 11 unique values and 0% NA
+#> rename: renamed one variable (track_id)
+#> select: dropped 5 variables (type, track_id, uri, track_href, analysis_url)
   
 glimpse(gosta_audio)
 #> Observations: 19
@@ -277,40 +291,6 @@ cor(gbcorr)
 #> liveness           0.7459700
 #> speechiness        1.0000000
 gbcorrs1 <- as.data.frame(cor(gbcorr))
-gbcorrs1
-#>                  duration_ms danceability      energy    loudness      tempo
-#> duration_ms       1.00000000   0.03575546 -0.09957649  0.16485951 -0.1589364
-#> danceability      0.03575546   1.00000000 -0.10466026  0.09671649 -0.2719148
-#> energy           -0.09957649  -0.10466026  1.00000000  0.85748849  0.5140085
-#> loudness          0.16485951   0.09671649  0.85748849  1.00000000  0.4952005
-#> tempo            -0.15893636  -0.27191484  0.51400852  0.49520052  1.0000000
-#> valence          -0.04414383  -0.10232090  0.72025346  0.48053791  0.5519247
-#> acousticness     -0.19009855   0.11222116 -0.74742026 -0.65043898 -0.3612391
-#> instrumentalness  0.12784620   0.06977532 -0.53088295 -0.49709651 -0.4411810
-#> liveness         -0.30987073  -0.25213421  0.49374017  0.30054882  0.5316901
-#> speechiness      -0.30678610  -0.31639826  0.45449667  0.27298422  0.4217976
-#>                      valence acousticness instrumentalness   liveness
-#> duration_ms      -0.04414383   -0.1900986       0.12784620 -0.3098707
-#> danceability     -0.10232090    0.1122212       0.06977532 -0.2521342
-#> energy            0.72025346   -0.7474203      -0.53088295  0.4937402
-#> loudness          0.48053791   -0.6504390      -0.49709651  0.3005488
-#> tempo             0.55192475   -0.3612391      -0.44118097  0.5316901
-#> valence           1.00000000   -0.7793878      -0.29646550  0.4743309
-#> acousticness     -0.77938779    1.0000000       0.39266796 -0.3261889
-#> instrumentalness -0.29646550    0.3926680       1.00000000 -0.3406087
-#> liveness          0.47433091   -0.3261889      -0.34060869  1.0000000
-#> speechiness       0.41684028   -0.3150009      -0.56643572  0.7459700
-#>                  speechiness
-#> duration_ms       -0.3067861
-#> danceability      -0.3163983
-#> energy             0.4544967
-#> loudness           0.2729842
-#> tempo              0.4217976
-#> valence            0.4168403
-#> acousticness      -0.3150009
-#> instrumentalness  -0.5664357
-#> liveness           0.7459700
-#> speechiness        1.0000000
 ```
 
 Or you could let some packages do the viz work for you. First, the
@@ -321,6 +301,12 @@ ggcorr(gbcorr, label = TRUE)
 ```
 
 <img src="images/unnamed-chunk-9-1.png" width="100%" />
+
+We see here some strong postive associations with energy & loundess
+returning a .9 coefficient, and liveness & speechiness and energy &
+valence each returing at .7 coefficient. The energy & acousticness and
+loudness & acousticness combinations each return a -.7 coefficient,
+showing a negative relationship between those music features.
 
 With the corrr package I tried a couple of approaches. First a basic
 matrix that prints to the console, and doesn’t look much different than
@@ -349,7 +335,8 @@ gbcorr %>%
 #> #   speechiness <dbl>
 ```
 
-Next, I used their rplot call and then a network graph
+Next, I used their rplot call and then rendered a network graph using
+the network\_plot() call.
 
 ``` r
 gbcorrs2 <- correlate(gbcorr)
@@ -389,10 +376,10 @@ labels, and dots colored by album name (using primary color from the
 cover) to see also if any of the albums clustered at all along either
 axis. The ggrepel package is used to move the labels off of the dots
 
-First, up, energy and happiness. Spotify uses the term valence to
-signify happiness, or “musical positiveness”. For energy, as they put it
-“Typically, energetic tracks feel fast, loud, and noisy.” Again, [see
-the API
+First, up, energy and valence, or happiness. Spotify uses the term
+valence to signify happiness, or “musical positiveness”. For energy, as
+they put it “Typically, energetic tracks feel fast, loud, and noisy.”
+Again, [see the API
 documentation](https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/)
 for definitions.
 
@@ -466,7 +453,10 @@ gosta_audio %>%
 
 So yes, most of our songs are in the bottom half of the happy scale. And
 there does seem to be a bit of a relationship between tempo, energy and
-happiness and of course a relationship between tempo and energy
+happiness and of course a relationship between tempo and energy. Going
+forward, I’d love to explore our song lyrics via text analysis,
+especially sentiment analysis to see if the songs Spotify classified as
+our most sad (low valence) had lyrics that were less positive.
 
 So if you like slightly melancholy mood-pop that’s in the 130 +/- BPM
 range, I think you’ll like us.
