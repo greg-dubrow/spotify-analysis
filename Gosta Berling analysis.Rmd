@@ -152,7 +152,7 @@ The result is a nice tidy dataframe, ready for some analysis.
 
 [Spotify's developer pages](https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/) have good explanations of the data. Some notes from spotify here about elements: 
 
-- Most of the aduio features are 0-1, 1 being highest. e.g. higher speechiness = higher ratio of words::music. Valence is "happiness", where higher = happier.
+- Most of the audio features are 0-1, 1 being highest. e.g. higher speechiness = higher ratio of words::music. Valence is "happiness", where higher = happier.
 - Loundess in dB, tempo is BPM
 
 First I wanted to look at basic correlations for the values. There are a number of ways to run and visualize correlations in r...a few examples follow. First thing I needed to do was a subset of the gosta_audio df for easier calls with the various correlation packages.
@@ -172,7 +172,7 @@ First, the ggally package.
 ggcorr(gbcorr, label = TRUE)
 ```
 
-We see here some strong postive associations with energy & loundess returning a .9 coefficient, and liveness & speechiness and energy & valence each returing at .7 coefficient. The energy & acousticness and loudness & acousticness combinations each return a -.7 coefficient, showing a negative relationship between those music features. 
+We see here some strong postive associations with energy & loundess returning a .9 coefficient, and liveness & speechiness and energy & valence each returning at .7 coefficient. The energy & acousticness and loudness & acousticness combinations each return a -.7 coefficient, showing a negative relationship between those music features. 
 
 With the corrr package I tried a couple of approaches. First a basic matrix that prints to the console, and doesn't look much different than base r.
 ```{r ECHO = FALSE}
@@ -234,7 +234,7 @@ gosta_audio %>%
 It's not until we get to about the 130 BPM range is it that our songs start to get to about a .5 valence (happiness) score, and from there the relationship between tempo & happiness really kicks in.
 
 
-Finally, tempo and energy
+Finally, tempo and energy...
 ```{r fig.width=7.5, fig.height=4.0, dpi = 300, ECHO = FALSE}
 gosta_audio %>%
   ggplot(aes(tempo, energy, color = album)) +

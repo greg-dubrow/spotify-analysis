@@ -8,6 +8,8 @@ library(tidylog)
 library(visdat)
 library(janitor)
 
+# example code & analysis
+  # https://frie.codes/posts/shuffling-spotify-liked-songs-checking-assumptions/
 
 # sets access token for session - keys in renviron
 access_token <- get_spotify_access_token()

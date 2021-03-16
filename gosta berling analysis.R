@@ -32,11 +32,18 @@ access_token <- get_spotify_access_token()
 # specifically this comment https://stackoverflow.com/a/51967789/10226848
 
 # gets full range of information for tracks from artist
-gosta_audio1 <- get_artist_audio_features(artist = 'Gosta Berling')
+
+# note: this only gets Gosta Berling's Saga. Need to use version w/ artist ID
+      #gosta_audio1 <- get_artist_audio_features(artist = 'Gosta Berling')
+# include single as Travel and Sweetheart listed as singles
+gosta_audio1 <- get_artist_audio_features(artist = "4Vb2yqJJthJTAZxKz4Aryn",
+                                           include_groups = c("album", "single"))
 glimpse(gosta_audio1)
 
+unnest(gosta_audio1, cols = c(album_images, artists, available_markets))
 gosta_audio1 %>%
   count(track_name, key, key_name, mode_name, key_mode)
+
 
 # for some reason only returning data for last album, so I need to get audio info song by song
 # First I looked up album IDs 
@@ -68,6 +75,7 @@ gosta_audio2 <- get_track_audio_features(c("2SotrXjkvjTZf05XSMKGyp", "07cTJ65GZ4
                                      authorization = get_spotify_access_token())
 glimpse(gosta_audio2)
 
+
 # get track number and name, merge from gbtracks - need b/b not returned from get_track_audio_features()
 gbtrack2 <- gbtracks %>%
   select(id, name, album, track_number) %>%
@@ -86,6 +94,9 @@ gosta_audio <- left_join(gosta_audio2, gbtrack2) %>%
          key_name, mode_name, key, mode)
   
 glimpse(gosta_audio)
+
+saveRDS(gosta_audio, file = "data/gosta_audio.rds")
+
 
 ## visualize the data!
   # some notes from spotify here about elements 
